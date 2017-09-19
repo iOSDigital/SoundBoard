@@ -7,11 +7,10 @@
 //
 
 #import "SoundBoardController.h"
-#import <AVFoundation/AVFoundation.h>
 
 
 @interface SoundBoardController ()
-@property (nonatomic,strong) AVAudioPlayer *audioPlayer;
+@property (nonatomic,strong) NSMutableSet *audioPlayerSet;
 @end
 
 
@@ -20,7 +19,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.audioPlayer = [AVAudioPlayer new];
+	self.audioPlayerSet = [NSMutableSet new];
 }
 
 
@@ -51,12 +50,19 @@
 		return;
 	}
 	
-	NSError *fileError;
-	self.audioPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:&fileError];
-	[self.audioPlayer prepareToPlay];
-	[self.audioPlayer play];
+	NSError *playerError;
+	AVAudioPlayer *player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:&playerError];
+	if (!playerError) {
+		player.delegate = self;
+		[self.audioPlayerSet addObject:player];
+		[player prepareToPlay];
+		[player play];
+	}
 	
 }
 
+-(void)audioPlayerDidFinishPlaying:(AVAudioPlayer *)player successfully:(BOOL)flag {
+	[self.audioPlayerSet removeObject:player];
+}
 
 @end
